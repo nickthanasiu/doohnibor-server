@@ -1,10 +1,14 @@
-
 const passport = require('passport');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local');
 const User = require('../models/User');
+
+const dotenv = require('dotenv');
+dotenv.config();
+
 const { PASSPORT_SECRET } = process.env;
+
 
 
 // Create local Strategy

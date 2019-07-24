@@ -1,5 +1,6 @@
 const NewsAPI = require('newsapi');
-const { NEWS_API_KEY } = process.env;
+//const { NEWS_API_KEY } = process.env;
+const NEWS_API_KEY = '6cd3a288d1bb482fb535de003e778dbf';
 const newsapi = new NewsAPI(NEWS_API_KEY);
 
 // @TODO: resplace shuffleArray function with a function that sorts the articles by date

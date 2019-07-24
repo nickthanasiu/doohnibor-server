@@ -1,4 +1,6 @@
 const jwt = require('jwt-simple');
+const dotenv = require('dotenv');
+dotenv.config();
 const { PASSPORT_SECRET } = process.env;
 
 const User = require('../models/User');

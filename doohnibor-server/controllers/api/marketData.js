@@ -67,6 +67,7 @@ exports.latest_price = async (req, res, next) => {
 
   // Convert cacheVal.value from String to Number
   const latestPrice = parseFloat(cacheVal.value, 10);
+
   // Send latest price to client
   res.json(latestPrice);
 };
@@ -83,7 +84,7 @@ const intradayCache = new Map();
 exports.intraday_data = async (req, res) => {
   const { symbol } = req.body;
   const now = new Date(Date.now());
-
+  
   const apiGet = async () => {
     try {
       const response = await axios.get(`${API_URL}/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${ALPHA_VANTAGE_KEY}`);

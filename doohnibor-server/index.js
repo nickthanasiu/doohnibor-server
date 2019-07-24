@@ -1,4 +1,5 @@
 const express = require('express');
+
 const http = require('http');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
@@ -8,9 +9,13 @@ const cors = require('cors');
 const app = express();
 const router = require('./routes/router');
 
+// Read environment variables from .env
+const dotenv = require('dotenv');
+dotenv.config();
+
 const { MONGO_DB_USER, MONGO_DB_PASSWORD } = process.env;
 
-// DB setup (prod)
+// DB setup
 mongoose.connect(`mongodb://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@ds223343.mlab.com:23343/heroku_n7pngq09`, {
   useNewUrlParser: true
 });
@@ -44,8 +49,9 @@ router(app);
 
 
 // Server setup
-const port = process.env.PORT || 3090;
+const port = process.env.PORT || 8000;
 const server = http.createServer(app);
 server.listen(port, () => {
   console.log('Listening on port: ', port);
 });
+
