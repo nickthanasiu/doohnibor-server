@@ -3,7 +3,7 @@ const Stock = require('../../models/Stock');
 const Company = require('../../models/Company');
 const User = require('../../models/User');
 
-const { cacheShouldRefresh } = require('../../util/market_data_util');
+const { cacheShouldRefresh, getYesterdayTimestamp } = require('../../util/market_data_util');
 
 const { ALPHA_VANTAGE_KEY } = process.env;
 const API_URL = 'https://www.alphavantage.co';
@@ -58,42 +58,64 @@ const portfolioIntraCache = new Map();
 exports.portfolio_intraday = async (req, res) => {
   const { symbols } = req.body;
 
-  // Create new timestamp each time this function is called
-  // Will be used to decide whether to use cached data or to make new API request
-  const now = new Date(Date.now());
-
   const apiGet = async (symbol) => {
     try {
       const response = await axios.get(`${API_URL}/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${ALPHA_VANTAGE_KEY}`);
       const metaData = Object.values(response.data)[0];
       const timeData = Object.values(response.data)[1];
-      const timePoints = Object.keys(timeData);
-      const pricePoints = Object.values(timeData);
+      let timePoints = Object.keys(timeData);
+      let pricePoints = Object.values(timeData);
 
       // Map timePoints to prices using the 'close' value for each 5 minute interval
-      const responseObj = {};
-
+      let responseObj = {};
+      
+      // Slicing off yesterday's data. We only want data from 09:35:00-16:00:00 of today
+      const cutOffIndex = timePoints.indexOf(`${getYesterdayTimestamp()} 16:00:00`);
+      timePoints = timePoints.slice(0, cutOffIndex);
+      pricePoints = pricePoints.slice(0, cutOffIndex);
+      
+      // Loops through pricePoints backwards to get closePoints
+      // from oldest to most recent
       const closePoints = [];
-      for (let i = 0; i < pricePoints.length; i++) {
+      for (let i = pricePoints.length - 1; i >= 0; i--) {
         closePoints.push(pricePoints[i]['4. close']);
       }
 
-      for (let i = 0; i < timePoints.length; i++) {
+      // @TODO: Review!!! There's probably a better way of doing this
+      // Reverse timePoints
+      const newTimePoints = [];
+      for (let i = timePoints.length - 1; i >= 0; i--) {
+        newTimePoints.push(timePoints[i]);
+      }
+
+      // Map closePoints to corresponding timePoints
+      for (let i = timePoints.length - 1; i >= 0; i--) {
         responseObj[timePoints[i]] = closePoints[i];
       }
 
+      // Check that newTimePoints and closePoints are the same length
+      // If not, we're going to be mapping prices to the wrong time points
+      if (newTimePoints.length === closePoints.length) {
+        for (let i = 0; i < newTimePoints.length; i++) {
+          responseObj[newTimePoints[i]] = closePoints[i];
+        }
+      }
 
       return responseObj;
+
     } catch (err) {
       return err;
     }
-  };
+  }; // End function apiGet()
 
-  const promises = symbols.map(async(symbol) => {
+  // Create new timestamp each time this function is called
+  // Will be used to decide whether to use cached data or to make new API request
+  const now = new Date(Date.now());
+
+  const promises = symbols.map( async symbol => {
     let cacheVal = portfolioIntraCache.get(symbol);
 
     if (!cacheVal || cacheShouldRefresh(cacheVal.lastRefresh)) {
-      console.log('Retrieving new intraday data for portfolio!');
       const retrieve = await apiGet(symbol);
       const valuesObj = {
         lastRefresh: now,
@@ -103,15 +125,12 @@ exports.portfolio_intraday = async (req, res) => {
       cacheVal = valuesObj;
     }
 
-    console.log('cacheVal.apiResponse: ', cacheVal.apiResponse);
     return cacheVal.apiResponse;
   });
 
-  console.log('HERE ARE PROMISES FOR PROMISE.ALL: ', promises, ' with type: ', typeof(promises));
 
   Promise.all(promises)
     .then((values) => {
-      console.log('PROMISE ALL RETURNS VALUES: ', values, ' with type: ', typeof(values));
       const timeKeys = Object.keys(values[0]);
       const sumObject = {};
 

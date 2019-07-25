@@ -69,3 +69,10 @@ exports.formatOpenPriceKey = (timestamp) => {
 
   return `${date} 09:30:00`;
 };
+
+
+exports.getYesterdayTimestamp = () => {
+  const y = new Date(Date.now() - 86400000);
+  
+  return y.toISOString().substr(0, 10);
+};
