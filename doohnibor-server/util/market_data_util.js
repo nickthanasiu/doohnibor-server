@@ -1,4 +1,5 @@
 /*eslint-disable*/
+const moment = require('moment');
 
 // Takes a the time value from our cache as argument
 // Determines whether or not 5 minutes has passed
@@ -72,7 +73,11 @@ exports.formatOpenPriceKey = (timestamp) => {
 
 
 exports.getYesterdayTimestamp = () => {
-  const y = new Date(Date.now() - 86400000);
-  
-  return y.toISOString().substr(0, 10);
+  console.log('yooooo');
+  const today = new Date();
+  const yesterday = moment().subtract(1, 'day').toISOString();
+  console.log('today: ', today);
+  console.log('yesterday: ', yesterday);
+  return yesterday;
+  //.toISOString().substr(0, 10);
 };

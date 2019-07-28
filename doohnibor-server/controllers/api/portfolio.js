@@ -57,7 +57,7 @@ const portfolioIntraCache = new Map();
 
 exports.portfolio_intraday = async (req, res) => {
   const { symbols } = req.body;
-
+  
   const apiGet = async (symbol) => {
     try {
       const response = await axios.get(`${API_URL}/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${ALPHA_VANTAGE_KEY}`);
@@ -65,12 +65,17 @@ exports.portfolio_intraday = async (req, res) => {
       const timeData = Object.values(response.data)[1];
       let timePoints = Object.keys(timeData);
       let pricePoints = Object.values(timeData);
+      //console.log('timePoints: ', timePoints);
+      
 
       // Map timePoints to prices using the 'close' value for each 5 minute interval
       let responseObj = {};
-      
+      console.log('wooooo 1');
       // Slicing off yesterday's data. We only want data from 09:35:00-16:00:00 of today
-      const cutOffIndex = timePoints.indexOf(`${getYesterdayTimestamp()} 16:00:00`);
+      //const cutOffIndex = timePoints.indexOf(`${getYesterdayTimestamp()} 16:00:00`);
+      getYesterdayTimestamp();
+      const cutOffIndex = timePoints.indexOf(`2019-07-25 16:00:00`);
+      console.log('wooooo 2');
       timePoints = timePoints.slice(0, cutOffIndex);
       pricePoints = pricePoints.slice(0, cutOffIndex);
       
@@ -93,13 +98,24 @@ exports.portfolio_intraday = async (req, res) => {
         responseObj[timePoints[i]] = closePoints[i];
       }
 
+      /*
       // Check that newTimePoints and closePoints are the same length
       // If not, we're going to be mapping prices to the wrong time points
+      
       if (newTimePoints.length === closePoints.length) {
-        for (let i = 0; i < newTimePoints.length; i++) {
-          responseObj[newTimePoints[i]] = closePoints[i];
-        }
+        //console.log('wooo');
+        
       }
+      */
+
+      console.log('close: ', closePoints);
+
+      for (let i = 0; i < newTimePoints.length; i++) {
+          
+        responseObj[newTimePoints[i]] = closePoints[i];
+      }
+
+      console.log('response: ', responseObj);
 
       return responseObj;
 

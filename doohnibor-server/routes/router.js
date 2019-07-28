@@ -17,8 +17,8 @@ module.exports = (app) => {
     res.send({ hi: 'there' });
   });
   app.get('/api/get_companies', CompaniesController.get_companies);
-  app.post('/signin', requireSignin, AuthenticationController.signin);
-  app.post('/signup', AuthenticationController.signup);
+  app.post('/api/signin', requireSignin, AuthenticationController.signin);
+  app.post('/api/signup', AuthenticationController.signup);
 
   app.post('/api/get_user_name', UserController.get_user_name);
 

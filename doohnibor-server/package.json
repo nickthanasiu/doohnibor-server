@@ -25,6 +25,7 @@
     "express": "^4.16.3",
     "express-session": "^1.15.6",
     "jwt-simple": "^0.5.5",
+    "moment": "^2.24.0",
     "mongoose": "^5.3.1",
     "morgan": "^1.9.1",
     "newsapi": "^2.4.0",
