@@ -73,11 +73,11 @@ exports.formatOpenPriceKey = (timestamp) => {
 
 
 exports.getYesterdayTimestamp = () => {
-  console.log('yooooo');
-  const today = new Date();
-  const yesterday = moment().subtract(1, 'day').toISOString();
-  console.log('today: ', today);
-  console.log('yesterday: ', yesterday);
+  const yesterday = 
+    moment()
+      .subtract(1, 'day')
+      .format()
+      .substr(0, 10);
+
   return yesterday;
-  //.toISOString().substr(0, 10);
 };

@@ -3,10 +3,11 @@ const Stock = require('../../models/Stock');
 const Company = require('../../models/Company');
 const User = require('../../models/User');
 
-const { cacheShouldRefresh, getYesterdayTimestamp } = require('../../util/market_data_util');
+const dotenv = require('dotenv');
+dotenv.config();
+const { ALPHA_VANTAGE_KEY, ALPHA_VANTAGE_API_URL } = process.env;
 
-const { ALPHA_VANTAGE_KEY } = process.env;
-const API_URL = 'https://www.alphavantage.co';
+const { cacheShouldRefresh, getYesterdayTimestamp } = require('../../util/market_data_util');
 
 exports.get_portfolio_value = (req, res, next) => {
   const { currentUserId } = req.body;
@@ -60,22 +61,17 @@ exports.portfolio_intraday = async (req, res) => {
   
   const apiGet = async (symbol) => {
     try {
-      const response = await axios.get(`${API_URL}/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${ALPHA_VANTAGE_KEY}`);
-      const metaData = Object.values(response.data)[0];
+      const response = await axios.get(
+        `${ALPHA_VANTAGE_API_URL}/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${ALPHA_VANTAGE_KEY}`
+      );
       const timeData = Object.values(response.data)[1];
       let timePoints = Object.keys(timeData);
       let pricePoints = Object.values(timeData);
-      //console.log('timePoints: ', timePoints);
-      
 
       // Map timePoints to prices using the 'close' value for each 5 minute interval
       let responseObj = {};
-      console.log('wooooo 1');
       // Slicing off yesterday's data. We only want data from 09:35:00-16:00:00 of today
-      //const cutOffIndex = timePoints.indexOf(`${getYesterdayTimestamp()} 16:00:00`);
-      getYesterdayTimestamp();
-      const cutOffIndex = timePoints.indexOf(`2019-07-25 16:00:00`);
-      console.log('wooooo 2');
+      const cutOffIndex = timePoints.indexOf(`${getYesterdayTimestamp()} 16:00:00`);
       timePoints = timePoints.slice(0, cutOffIndex);
       pricePoints = pricePoints.slice(0, cutOffIndex);
       
@@ -108,15 +104,12 @@ exports.portfolio_intraday = async (req, res) => {
       }
       */
 
-      console.log('close: ', closePoints);
 
-      for (let i = 0; i < newTimePoints.length; i++) {
-          
+      for (let i = 0; i < newTimePoints.length; i++) {   
         responseObj[newTimePoints[i]] = closePoints[i];
       }
 
-      console.log('response: ', responseObj);
-
+      //console.log('responseObj: ', responseObj);
       return responseObj;
 
     } catch (err) {
@@ -126,6 +119,10 @@ exports.portfolio_intraday = async (req, res) => {
 
   // Create new timestamp each time this function is called
   // Will be used to decide whether to use cached data or to make new API request
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //@TODO: lastRefresh is returning time in the wrong timezone. Should be local timezone rather than UTC
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const now = new Date(Date.now());
 
   const promises = symbols.map( async symbol => {
@@ -140,7 +137,7 @@ exports.portfolio_intraday = async (req, res) => {
       portfolioIntraCache.set(symbol, valuesObj);
       cacheVal = valuesObj;
     }
-
+    console.log('cacheVal: ', cacheVal);
     return cacheVal.apiResponse;
   });
 
@@ -206,3 +203,22 @@ exports.set_buying_power = (req, res, next) => {
     res.json(newValue);
   });
 };
+
+
+/*
+
+
+ // Create cache for portfolio_daily
+ const portfolioDailyCache = new Map();
+ exports.portfolio_daily = async (req, res) => {
+   const { symbols } = req.body;
+
+   const apiGet = async (symbol) => {
+     try {
+       const response = await axios.get(
+        `${ALPHA_VANTAGE_API_URL}/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&interval=`
+       );
+     }
+   };
+ };
+*/
