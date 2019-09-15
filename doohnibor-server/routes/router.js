@@ -35,6 +35,9 @@ module.exports = (app) => {
   app.post('/api/set_buying_power', PortfolioController.set_buying_power);
   app.post('/api/portfolio_value', PortfolioController.get_portfolio_value);
   app.post('/api/portfolio_intraday', PortfolioController.portfolio_intraday);
+  
+  app.get('/api/portfolio_pastweek/:symbols', PortfolioController.portfolio_pastweek);
+  app.get('/api/portfolio_pastmonth/:symbols', PortfolioController.portfolio_pastmonth);
 
   app.post('/api/get_fundamentals', FundamentalsController.get_fundamentals);
 

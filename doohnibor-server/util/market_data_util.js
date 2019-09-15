@@ -73,11 +73,44 @@ exports.formatOpenPriceKey = (timestamp) => {
 
 
 exports.getYesterdayTimestamp = () => {
-  const yesterday = 
-    moment()
-      .subtract(1, 'day')
-      .format()
-      .substr(0, 10);
+  const today = moment();
+  let yesterday;
+  const todayDate = new Date(today);
+  const todayDay = todayDate.getDay();
+  const isSunday = todayDay === 0;
+  const isMonday = todayDay === 1;
+  const isSundayOrMonday = (isSunday || isMonday) ? true : false;
+  
+  
+  if (isSundayOrMonday) {
+    yesterday = today.subtract(3, 'days');
+  } else {
+    yesterday = today.subtract(1, 'days');
+  }
+  
+  const formattedYesterday = yesterday.format().substr(0, 10);
 
-  return yesterday;
+  return formattedYesterday;
+};
+
+exports.getMonthAgoTimestamp = () => {
+  let monthAgo = moment().subtract(1, 'month');
+  const monthAgoDate = new Date(monthAgo);
+  const monthAgoDay = monthAgoDate.getDay();
+  const isSaturday = monthAgoDay === 6;
+  const isSunday = monthAgoDay === 0;
+  const isWeekend = (isSaturday || isSunday) ? true : false; 
+
+  if (isWeekend) {
+    if (isSunday) {
+      monthAgo = monthAgo.subtract(2, 'days');
+    } else {
+      monthAgo = monthAgo.subtract(1, 'days');
+    }
+
+  }
+
+  const formattedMonthAgoDate = monthAgo.format().substr(0, 10);
+  
+  return formattedMonthAgoDate;
 };
