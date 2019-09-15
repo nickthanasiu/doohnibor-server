@@ -79,9 +79,7 @@ exports.portfolio_intraday = async (req, res) => {
       // Slicing off yesterday's data. We only want data from 09:35:00-16:00:00 of today
       console.log(getYesterdayTimestamp());
       const cutOffIndex = timePoints.indexOf(`${getYesterdayTimestamp()} 16:00:00`);
-      console.log('cutoffindex: ', cutOffIndex);
       timePoints = timePoints.slice(0, cutOffIndex);
-      console.log('Sliced timePoints: ', timePoints);
       pricePoints = pricePoints.slice(0, cutOffIndex);
       
       // Loops through pricePoints backwards to get closePoints
@@ -97,6 +95,7 @@ exports.portfolio_intraday = async (req, res) => {
       for (let i = timePoints.length - 1; i >= 0; i--) {
         newTimePoints.push(timePoints[i]);
       }
+
 
       // Map closePoints to corresponding timePoints
       for (let i = timePoints.length - 1; i >= 0; i--) {
@@ -118,7 +117,7 @@ exports.portfolio_intraday = async (req, res) => {
         responseObj[newTimePoints[i]] = closePoints[i];
       }
 
-      //console.log('responseObj: ', responseObj);
+      console.log('responseObj: ', responseObj);
       return responseObj;
 
     } catch (err) {
