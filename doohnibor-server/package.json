@@ -16,7 +16,7 @@
     "nodemon": "^1.18.4"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.2",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.3",
     "connect-mongo": "^2.0.1",
