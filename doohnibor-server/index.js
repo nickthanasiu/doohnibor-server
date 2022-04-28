@@ -13,12 +13,10 @@ const router = require('./routes/router');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const { MONGO_DB_USER, MONGO_DB_PASSWORD } = process.env;
-
 // DB setup
-mongoose.connect(`mongodb://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@ds223343.mlab.com:23343/heroku_n7pngq09`, {
-  useNewUrlParser: true
-});
+const { MONGO_DB_USER, MONGO_DB_PASSWORD } = process.env;
+const MONGO_URL = `mongodb+srv://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@cluster0.3l6s1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+mongoose.connect(MONGO_URL, { useNewUrlParser: true });
 
 // App setup
 app.use(morgan('tiny'));
